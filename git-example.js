@@ -14,3 +14,4 @@ let email = "paulo@gmail.com";
 let dataNascimento = new Date("1980-01-01");
 
 console.log("BOA NOITE, " + nome);
+console.log("Você tem " + idade + " anos");
