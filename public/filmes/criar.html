@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo Filme — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html" class="ativo">Filmes</a>
+    <a href="/users/index.html">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Novo Filme</h1>
+      <a href="/filmes/index.html" class="btn btn-outline">← Voltar</a>
+    </div>
+
+    <div class="form-card">
+      <form id="form">
+        <div class="form-group">
+          <label for="titulo">Título</label>
+          <input type="text" id="titulo" placeholder="Ex: O Poderoso Chefão" required>
+        </div>
+
+        <div class="form-group">
+          <label for="diretor">Diretor</label>
+          <input type="text" id="diretor" placeholder="Ex: Francis Ford Coppola" required>
+        </div>
+
+        <div class="form-group">
+          <label for="ano">Ano</label>
+          <input type="number" id="ano" placeholder="Ex: 1972" min="1888" max="2100" required>
+        </div>
+
+        <div class="form-group">
+          <label for="genero">Gênero</label>
+          <input type="text" id="genero" placeholder="Ex: Drama, Ação, Comédia..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="duracao">Duração <span class="opcional">(em minutos)</span></label>
+          <input type="number" id="duracao" placeholder="Ex: 175" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="poster">Poster <span class="opcional">(URL da imagem — opcional)</span></label>
+          <input type="url" id="poster" placeholder="https://...">
+          <img id="previewPoster" src="" alt="Preview" style="display:none;margin-top:10px;max-height:200px;border-radius:4px;">
+        </div>
+
+        <div class="form-group">
+          <label for="sinopse">Sinopse <span class="opcional">(opcional)</span></label>
+          <textarea id="sinopse" placeholder="Breve descrição do filme..."></textarea>
+        </div>
+
+        <div class="form-acoes">
+          <button type="submit" class="btn btn-primario">Cadastrar Filme</button>
+          <a href="/filmes/index.html" class="btn btn-outline">Cancelar</a>
+        </div>
+
+        <div id="msg" class="msg"></div>
+      </form>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // Preview do poster ao digitar a URL
+    document.getElementById('poster').addEventListener('input', (e) => {
+      const preview = document.getElementById('previewPoster');
+      const url = e.target.value.trim();
+      if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        preview.onerror = () => { preview.style.display = 'none'; };
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      ocultarMensagem('msg');
+
+      const dados = {
+        titulo: document.getElementById('titulo').value,
+        diretor: document.getElementById('diretor').value,
+        ano: document.getElementById('ano').value,
+        genero: document.getElementById('genero').value,
+        duracao: document.getElementById('duracao').value,
+        poster: document.getElementById('poster').value || undefined,
+        sinopse: document.getElementById('sinopse').value || undefined,
+      };
+
+      try {
+        await filmesApi.criar(dados);
+        mostrarMensagem('msg', 'Filme cadastrado com sucesso!', 'sucesso');
+        e.target.reset();
+
+        setTimeout(() => {
+          window.location.href = '/filmes/index.html';
+        }, 1200);
+
+      } catch (erro) {
+        mostrarMensagem('msg', erro.message, 'erro');
+      }
+    });
+  </script>
+</body>
+</html>

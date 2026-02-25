@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Filme — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html" class="ativo">Filmes</a>
+    <a href="/users/index.html">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1 id="tituloPagina">Editar Filme</h1>
+      <a href="/filmes/index.html" class="btn btn-outline">← Voltar</a>
+    </div>
+
+    <div id="conteudo">
+      <div class="loading">Carregando dados do filme...</div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const id = getParam('id');
+
+    if (!id) {
+      document.getElementById('conteudo').innerHTML =
+        '<div class="vazio"><p>ID do filme não informado.</p></div>';
+    } else {
+      carregarFilme();
+    }
+
+    async function carregarFilme() {
+      try {
+        const filme = await filmesApi.buscar(id);
+        document.getElementById('tituloPagina').textContent = 'Editar: ' + filme.titulo;
+        renderizarFormulario(filme);
+      } catch (erro) {
+        document.getElementById('conteudo').innerHTML =
+          `<div class="vazio"><p>Erro: ${erro.message}</p></div>`;
+      }
+    }
+
+    function renderizarFormulario(filme) {
+      document.getElementById('conteudo').innerHTML = `
+        <div class="form-card">
+          <form id="form">
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input type="text" id="titulo" value="${filme.titulo}" required>
+            </div>
+
+            <div class="form-group">
+              <label for="diretor">Diretor</label>
+              <input type="text" id="diretor" value="${filme.diretor}" required>
+            </div>
+
+            <div class="form-group">
+              <label for="ano">Ano</label>
+              <input type="number" id="ano" value="${filme.ano}" min="1888" max="2100" required>
+            </div>
+
+            <div class="form-group">
+              <label for="genero">Gênero</label>
+              <input type="text" id="genero" value="${filme.genero}" required>
+            </div>
+
+            <div class="form-group">
+              <label for="duracao">Duração <span class="opcional">(em minutos)</span></label>
+              <input type="number" id="duracao" value="${filme.duracao}" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="poster">Poster <span class="opcional">(URL da imagem — opcional)</span></label>
+              <input type="url" id="poster" value="${filme.poster || ''}">
+              <img id="previewPoster" src="${filme.poster || ''}" alt="Preview"
+                style="${filme.poster ? 'display:block' : 'display:none'};margin-top:10px;max-height:200px;border-radius:4px;">
+            </div>
+
+            <div class="form-group">
+              <label for="sinopse">Sinopse <span class="opcional">(opcional)</span></label>
+              <textarea id="sinopse">${filme.sinopse || ''}</textarea>
+            </div>
+
+            <div class="form-acoes">
+              <button type="submit" class="btn btn-primario">Salvar Alterações</button>
+              <a href="/filmes/detalhes.html?id=${filme.id}" class="btn btn-outline">Cancelar</a>
+            </div>
+
+            <div id="msg" class="msg"></div>
+          </form>
+        </div>`;
+
+      document.getElementById('poster').addEventListener('input', (e) => {
+        const preview = document.getElementById('previewPoster');
+        const url = e.target.value.trim();
+        if (url) {
+          preview.src = url;
+          preview.style.display = 'block';
+          preview.onerror = () => { preview.style.display = 'none'; };
+        } else {
+          preview.style.display = 'none';
+        }
+      });
+
+      document.getElementById('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        ocultarMensagem('msg');
+
+        const dados = {
+          titulo: document.getElementById('titulo').value,
+          diretor: document.getElementById('diretor').value,
+          ano: document.getElementById('ano').value,
+          genero: document.getElementById('genero').value,
+          duracao: document.getElementById('duracao').value,
+          poster: document.getElementById('poster').value || undefined,
+          sinopse: document.getElementById('sinopse').value || undefined,
+        };
+
+        try {
+          await filmesApi.atualizar(id, dados);
+          mostrarMensagem('msg', 'Filme atualizado com sucesso!', 'sucesso');
+
+          setTimeout(() => {
+            window.location.href = '/filmes/detalhes.html?id=' + id;
+          }, 1200);
+
+        } catch (erro) {
+          mostrarMensagem('msg', erro.message, 'erro');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

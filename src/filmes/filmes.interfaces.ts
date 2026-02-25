@@ -12,6 +12,7 @@ export interface Filme {
   genero: string;
   diretor: string;
   duracao: number; // em minutos
+  poster?: string;
   sinopse?: string;
   avaliacoes: Avaliacao[];
   criadoEm: Date;
@@ -24,6 +25,7 @@ export interface CriarFilmeDto {
   genero: string;
   diretor: string;
   duracao: number;
+  poster?: string;
   sinopse?: string;
 }
 
@@ -33,6 +35,7 @@ export interface AtualizarFilmeDto {
   genero?: string;
   diretor?: string;
   duracao?: number;
+  poster?: string;
   sinopse?: string;
 }
 

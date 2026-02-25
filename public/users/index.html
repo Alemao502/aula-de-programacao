@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html">Filmes</a>
+    <a href="/users/index.html" class="ativo">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Usuários</h1>
+      <a href="/users/criar.html" class="btn btn-primario">+ Novo Usuário</a>
+    </div>
+
+    <div id="conteudo">
+      <div class="loading">Carregando usuários...</div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function carregarUsuarios() {
+      const conteudo = document.getElementById('conteudo');
+
+      try {
+        const usuarios = await usuariosApi.listar();
+
+        if (usuarios.length === 0) {
+          conteudo.innerHTML = `
+            <div class="vazio">
+              <p>Nenhum usuário cadastrado.</p>
+              <a href="/users/criar.html" class="btn btn-primario">Cadastrar primeiro usuário</a>
+            </div>`;
+          return;
+        }
+
+        const linhas = usuarios.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.nome}</td>
+            <td>${u.email}</td>
+            <td>${u.avatar ? '<a href="' + u.avatar + '" target="_blank">Ver</a>' : '—'}</td>
+            <td>${formatarData(u.criadoEm)}</td>
+            <td>
+              <div class="acoes">
+                <a href="/users/editar.html?id=${u.id}" class="btn btn-outline btn-sm">Editar</a>
+                <button class="btn btn-perigo btn-sm" onclick="remover(${u.id}, '${u.nome}')">Excluir</button>
+              </div>
+            </td>
+          </tr>`).join('');
+
+        conteudo.innerHTML = `
+          <div class="tabela-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Avatar</th>
+                  <th>Cadastrado em</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>${linhas}</tbody>
+            </table>
+          </div>`;
+
+      } catch (erro) {
+        conteudo.innerHTML =
+          `<div class="vazio"><p>Erro ao carregar usuários: ${erro.message}</p></div>`;
+      }
+    }
+
+    async function remover(id, nome) {
+      if (!confirm(`Deseja excluir o usuário "${nome}"?`)) return;
+
+      try {
+        await usuariosApi.remover(id);
+        carregarUsuarios();
+      } catch (erro) {
+        alert('Erro ao excluir: ' + erro.message);
+      }
+    }
+
+    carregarUsuarios();
+  </script>
+</body>
+</html>

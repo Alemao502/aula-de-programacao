@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Usuário — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html">Filmes</a>
+    <a href="/users/index.html" class="ativo">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1 id="tituloPagina">Editar Usuário</h1>
+      <a href="/users/index.html" class="btn btn-outline">← Voltar</a>
+    </div>
+
+    <div id="conteudo">
+      <div class="loading">Carregando dados do usuário...</div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const id = getParam('id');
+
+    if (!id) {
+      document.getElementById('conteudo').innerHTML =
+        '<div class="vazio"><p>ID do usuário não informado.</p></div>';
+    } else {
+      carregarUsuario();
+    }
+
+    async function carregarUsuario() {
+      try {
+        const usuario = await usuariosApi.buscar(id);
+        document.getElementById('tituloPagina').textContent = 'Editar: ' + usuario.nome;
+        renderizarFormulario(usuario);
+      } catch (erro) {
+        document.getElementById('conteudo').innerHTML =
+          `<div class="vazio"><p>Erro: ${erro.message}</p></div>`;
+      }
+    }
+
+    function renderizarFormulario(usuario) {
+      document.getElementById('conteudo').innerHTML = `
+        <div class="form-card">
+          <form id="form">
+            <div class="form-group">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" value="${usuario.nome}" required>
+            </div>
+
+            <div class="form-group">
+              <label for="avatar">Avatar <span class="opcional">(URL da imagem — opcional)</span></label>
+              <input type="url" id="avatar" value="${usuario.avatar || ''}" placeholder="https://...">
+            </div>
+
+            <div class="form-acoes">
+              <button type="submit" class="btn btn-primario">Salvar Alterações</button>
+              <a href="/users/index.html" class="btn btn-outline">Cancelar</a>
+            </div>
+
+            <div id="msg" class="msg"></div>
+          </form>
+        </div>`;
+
+      document.getElementById('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        ocultarMensagem('msg');
+
+        const dados = {
+          nome: document.getElementById('nome').value,
+          avatar: document.getElementById('avatar').value || undefined,
+        };
+
+        try {
+          await usuariosApi.atualizar(id, dados);
+          mostrarMensagem('msg', 'Usuário atualizado com sucesso!', 'sucesso');
+
+          setTimeout(() => {
+            window.location.href = '/users/index.html';
+          }, 1200);
+
+        } catch (erro) {
+          mostrarMensagem('msg', erro.message, 'erro');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

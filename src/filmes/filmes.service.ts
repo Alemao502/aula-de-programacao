@@ -60,6 +60,7 @@ export class FilmesService {
       genero: dados.genero.trim(),
       diretor: dados.diretor.trim(),
       duracao: Number(dados.duracao),
+      poster: dados.poster?.trim(),
       sinopse: dados.sinopse?.trim(),
     });
   }
@@ -91,6 +92,7 @@ export class FilmesService {
       genero: dados.genero?.trim(),
       diretor: dados.diretor?.trim(),
       duracao: dados.duracao !== undefined ? Number(dados.duracao) : undefined,
+      poster: dados.poster?.trim(),
       sinopse: dados.sinopse?.trim(),
     });
   }

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Filme — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html" class="ativo">Filmes</a>
+    <a href="/users/index.html">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <a href="/filmes/index.html" class="btn btn-outline">← Voltar</a>
+    </div>
+
+    <div id="conteudo">
+      <div class="loading">Carregando...</div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const id = getParam('id');
+
+    if (!id) {
+      document.getElementById('conteudo').innerHTML =
+        '<div class="vazio"><p>ID do filme não informado.</p></div>';
+    } else {
+      carregarDetalhes();
+    }
+
+    async function carregarDetalhes() {
+      try {
+        const filme = await filmesApi.buscar(id);
+        renderizarDetalhes(filme);
+        carregarAvaliacoes();
+      } catch (erro) {
+        document.getElementById('conteudo').innerHTML =
+          `<div class="vazio"><p>Erro: ${erro.message}</p></div>`;
+      }
+    }
+
+    function renderizarDetalhes(filme) {
+      const notaHtml = filme.mediaAvaliacoes !== null
+        ? `<div class="nota-grande">
+             <span class="valor">${filme.mediaAvaliacoes}</span>
+             <span class="max">/ 10</span>
+           </div>`
+        : `<p style="color:#aaa;font-size:14px;">Sem avaliações ainda</p>`;
+
+      const sinopseHtml = filme.sinopse
+        ? `<div class="form-group" style="margin-top:16px">
+             <p style="color:#ccc;font-size:14px;line-height:1.6">${filme.sinopse}</p>
+           </div>`
+        : '';
+
+      const posterHtml = filme.poster
+        ? `<img src="${filme.poster}" alt="Poster" style="width:160px;min-width:160px;height:240px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
+        : '';
+
+      document.getElementById('conteudo').innerHTML = `
+        <div class="detalhe-header" style="display:flex;gap:28px;align-items:flex-start">
+          ${posterHtml}
+          <div style="flex:1">
+            <h1>${filme.titulo}</h1>
+            <p class="subtitulo">${filme.ano} &bull; ${filme.genero} &bull; ${filme.duracao} min</p>
+            ${notaHtml}
+            ${sinopseHtml}
+            <div style="margin-top:20px;display:flex;gap:10px">
+              <a href="/filmes/editar.html?id=${filme.id}" class="btn btn-primario">Editar</a>
+              <button class="btn btn-perigo" onclick="excluir(${filme.id}, '${filme.titulo}')">Excluir</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="detalhe-secao">
+          <h2>Informações</h2>
+          <div class="detalhe-grid">
+            <div class="detalhe-item">
+              <label>Diretor</label>
+              <p>${filme.diretor}</p>
+            </div>
+            <div class="detalhe-item">
+              <label>Ano</label>
+              <p>${filme.ano}</p>
+            </div>
+            <div class="detalhe-item">
+              <label>Gênero</label>
+              <p>${filme.genero}</p>
+            </div>
+            <div class="detalhe-item">
+              <label>Duração</label>
+              <p>${filme.duracao} minutos</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="detalhe-secao">
+          <h2>Avaliações</h2>
+          <div id="listaAvaliacoes"><div class="loading">Carregando avaliações...</div></div>
+        </div>
+
+        <div class="detalhe-secao">
+          <h2>Adicionar Avaliação</h2>
+          <form id="formAvaliacao">
+            <div class="form-group">
+              <label for="nota">Nota <span class="opcional">(0 a 10)</span></label>
+              <input type="number" id="nota" placeholder="Ex: 8.5" min="0" max="10" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label for="comentario">Comentário <span class="opcional">(opcional)</span></label>
+              <textarea id="comentario" placeholder="O que achou do filme?"></textarea>
+            </div>
+            <div class="form-acoes">
+              <button type="submit" class="btn btn-primario">Enviar Avaliação</button>
+            </div>
+            <div id="msgAvaliacao" class="msg"></div>
+          </form>
+        </div>`;
+
+      document.getElementById('formAvaliacao').addEventListener('submit', enviarAvaliacao);
+    }
+
+    async function carregarAvaliacoes() {
+      try {
+        const resultado = await filmesApi.listarAvaliacoes(id);
+        const lista = document.getElementById('listaAvaliacoes');
+
+        if (resultado.avaliacoes.length === 0) {
+          lista.innerHTML = '<p style="color:#888">Nenhuma avaliação ainda. Seja o primeiro!</p>';
+          return;
+        }
+
+        const mediaHtml = `<p style="margin-bottom:16px;font-size:14px;color:#555">
+          Média: <strong>${resultado.media}</strong> &bull; ${resultado.total} avaliação(ões)
+        </p>`;
+
+        const itens = resultado.avaliacoes.map(av => `
+          <div class="avaliacao-item">
+            <div class="avaliacao-nota">${av.nota}</div>
+            <div>
+              <p class="avaliacao-comentario">${av.comentario || '<em style="color:#aaa">Sem comentário</em>'}</p>
+              <p class="avaliacao-data">${formatarData(av.criadoEm)}</p>
+            </div>
+          </div>`).join('');
+
+        lista.innerHTML = `<div class="lista-avaliacoes">${mediaHtml}${itens}</div>`;
+
+      } catch (erro) {
+        document.getElementById('listaAvaliacoes').innerHTML =
+          `<p style="color:red">Erro: ${erro.message}</p>`;
+      }
+    }
+
+    async function enviarAvaliacao(e) {
+      e.preventDefault();
+      ocultarMensagem('msgAvaliacao');
+
+      const dados = {
+        nota: parseFloat(document.getElementById('nota').value),
+        comentario: document.getElementById('comentario').value || undefined,
+      };
+
+      try {
+        await filmesApi.avaliar(id, dados);
+        mostrarMensagem('msgAvaliacao', 'Avaliação enviada!', 'sucesso');
+        e.target.reset();
+        carregarAvaliacoes();
+
+        // Atualiza a nota no cabeçalho
+        const filme = await filmesApi.buscar(id);
+        if (filme.mediaAvaliacoes !== null) {
+          document.querySelector('.nota-grande .valor').textContent = filme.mediaAvaliacoes;
+        }
+
+      } catch (erro) {
+        mostrarMensagem('msgAvaliacao', erro.message, 'erro');
+      }
+    }
+
+    async function excluir(id, titulo) {
+      if (!confirm(`Deseja excluir o filme "${titulo}"?`)) return;
+      try {
+        await filmesApi.remover(id);
+        window.location.href = '/filmes/index.html';
+      } catch (erro) {
+        alert('Erro ao excluir: ' + erro.message);
+      }
+    }
+  </script>
+</body>
+</html>

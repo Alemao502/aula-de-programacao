@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filmes — CineApp</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/filmes/index.html" class="logo">CineApp</a>
+    <a href="/filmes/index.html" class="ativo">Filmes</a>
+    <a href="/users/index.html">Usuários</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Filmes</h1>
+      <a href="/filmes/criar.html" class="btn btn-primario">+ Novo Filme</a>
+    </div>
+
+    <div class="busca">
+      <input type="text" id="buscaTitulo" placeholder="Buscar por título...">
+      <input type="text" id="buscaGenero" placeholder="Filtrar por gênero...">
+      <button class="btn btn-outline" onclick="buscar()">Buscar</button>
+      <button class="btn btn-outline" onclick="limparBusca()">Limpar</button>
+    </div>
+
+    <div id="conteudo">
+      <div class="loading">Carregando filmes...</div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function carregarFilmes(titulo, genero) {
+      const conteudo = document.getElementById('conteudo');
+      conteudo.innerHTML = '<div class="loading">Carregando filmes...</div>';
+
+      try {
+        const filmes = await filmesApi.listar(titulo, genero);
+
+        if (filmes.length === 0) {
+          conteudo.innerHTML = `
+            <div class="vazio">
+              <p>Nenhum filme encontrado.</p>
+              <a href="/filmes/criar.html" class="btn btn-primario">Cadastrar primeiro filme</a>
+            </div>`;
+          return;
+        }
+
+        const cards = filmes.map(filme => {
+          const nota = filme.mediaAvaliacoes !== null
+            ? `<div class="nota"><span class="nota-estrela">★</span> ${filme.mediaAvaliacoes} / 10</div>`
+            : `<p class="nota-vazia">Sem avaliações ainda</p>`;
+
+          const posterHtml = filme.poster
+            ? `<img src="${filme.poster}" alt="Poster de ${filme.titulo}" style="width:100%;height:220px;object-fit:cover;">`
+            : `<div style="width:100%;height:220px;background:#2a2a40;display:flex;align-items:center;justify-content:center;color:#555;font-size:13px;">Sem poster</div>`;
+
+          return `
+            <div class="card">
+              <a href="/filmes/detalhes.html?id=${filme.id}" style="display:block;overflow:hidden">
+                ${posterHtml}
+              </a>
+              <div class="card-topo">
+                <h2>${filme.titulo}</h2>
+                <p class="ano">${filme.ano}</p>
+              </div>
+              <div class="card-corpo">
+                <span class="tag">${filme.genero}</span>
+                <p class="card-info">🎬 ${filme.diretor}</p>
+                <p class="card-info">⏱ ${filme.duracao} min</p>
+                ${nota}
+              </div>
+              <div class="card-acoes">
+                <a href="/filmes/detalhes.html?id=${filme.id}" class="btn btn-secundario btn-sm">Detalhes</a>
+                <a href="/filmes/editar.html?id=${filme.id}" class="btn btn-outline btn-sm">Editar</a>
+                <button class="btn btn-perigo btn-sm" onclick="remover(${filme.id}, '${filme.titulo}')">Excluir</button>
+              </div>
+            </div>`;
+        }).join('');
+
+        conteudo.innerHTML = `<div class="grid-filmes">${cards}</div>`;
+
+      } catch (erro) {
+        conteudo.innerHTML = `<div class="vazio"><p>Erro ao carregar filmes: ${erro.message}</p></div>`;
+      }
+    }
+
+    function buscar() {
+      const titulo = document.getElementById('buscaTitulo').value;
+      const genero = document.getElementById('buscaGenero').value;
+      carregarFilmes(titulo, genero);
+    }
+
+    function limparBusca() {
+      document.getElementById('buscaTitulo').value = '';
+      document.getElementById('buscaGenero').value = '';
+      carregarFilmes();
+    }
+
+    async function remover(id, titulo) {
+      if (!confirm(`Deseja excluir o filme "${titulo}"?`)) return;
+
+      try {
+        await filmesApi.remover(id);
+        carregarFilmes();
+      } catch (erro) {
+        alert('Erro ao excluir: ' + erro.message);
+      }
+    }
+
+    // Permitir busca ao pressionar Enter
+    document.getElementById('buscaTitulo').addEventListener('keydown', e => {
+      if (e.key === 'Enter') buscar();
+    });
+    document.getElementById('buscaGenero').addEventListener('keydown', e => {
+      if (e.key === 'Enter') buscar();
+    });
+
+    carregarFilmes();
+  </script>
+</body>
+</html>

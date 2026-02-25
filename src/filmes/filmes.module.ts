@@ -6,5 +6,6 @@ import { FilmesController } from './filmes.controller';
 @Module({
   controllers: [FilmesController],
   providers: [FilmesRepository, FilmesService],
+  exports: [FilmesRepository],
 })
 export class FilmesModule {}

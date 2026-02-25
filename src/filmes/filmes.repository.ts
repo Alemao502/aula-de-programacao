@@ -28,6 +28,7 @@ export class FilmesRepository {
       genero: dados.genero,
       diretor: dados.diretor,
       duracao: dados.duracao,
+      poster: dados.poster,
       sinopse: dados.sinopse,
       avaliacoes: [],
       criadoEm: new Date(),
@@ -44,6 +45,7 @@ export class FilmesRepository {
     if (dados.genero !== undefined) filme.genero = dados.genero;
     if (dados.diretor !== undefined) filme.diretor = dados.diretor;
     if (dados.duracao !== undefined) filme.duracao = dados.duracao;
+    if (dados.poster !== undefined) filme.poster = dados.poster;
     if (dados.sinopse !== undefined) filme.sinopse = dados.sinopse;
 
     filme.atualizadoEm = new Date();
