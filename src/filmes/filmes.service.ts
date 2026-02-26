@@ -62,6 +62,7 @@ export class FilmesService {
       duracao: Number(dados.duracao),
       poster: dados.poster?.trim(),
       sinopse: dados.sinopse?.trim(),
+      trailer: dados.trailer?.trim(),
     });
   }
 
@@ -94,6 +95,7 @@ export class FilmesService {
       duracao: dados.duracao !== undefined ? Number(dados.duracao) : undefined,
       poster: dados.poster?.trim(),
       sinopse: dados.sinopse?.trim(),
+      trailer: dados.trailer?.trim(),
     });
   }
 

@@ -14,6 +14,7 @@ export interface Filme {
   duracao: number; // em minutos
   poster?: string;
   sinopse?: string;
+  trailer?: string;
   avaliacoes: Avaliacao[];
   criadoEm: Date;
   atualizadoEm: Date;
@@ -27,6 +28,7 @@ export interface CriarFilmeDto {
   duracao: number;
   poster?: string;
   sinopse?: string;
+  trailer?: string;
 }
 
 export interface AtualizarFilmeDto {
@@ -37,6 +39,7 @@ export interface AtualizarFilmeDto {
   duracao?: number;
   poster?: string;
   sinopse?: string;
+  trailer?: string;
 }
 
 export interface CriarAvaliacaoDto {

@@ -54,6 +54,11 @@
         </div>
 
         <div class="form-group">
+          <label for="trailer">Trailer <span class="opcional">(URL do YouTube — opcional)</span></label>
+          <input type="url" id="trailer" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
+        <div class="form-group">
           <label for="sinopse">Sinopse <span class="opcional">(opcional)</span></label>
           <textarea id="sinopse" placeholder="Breve descrição do filme..."></textarea>
         </div>
@@ -94,6 +99,7 @@
         genero: document.getElementById('genero').value,
         duracao: document.getElementById('duracao').value,
         poster: document.getElementById('poster').value || undefined,
+        trailer: document.getElementById('trailer').value || undefined,
         sinopse: document.getElementById('sinopse').value || undefined,
       };
 

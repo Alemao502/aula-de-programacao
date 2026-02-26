@@ -24,6 +24,7 @@ export class SeedService implements OnModuleInit {
         duracao: 175,
         poster: 'https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg',
         sinopse: 'A família Corleone é uma das mais poderosas famílias mafiosas de Nova York. Quando o patriarca Vito Corleone é assassinado, seu filho Michael assume o controle do império criminoso.',
+        trailer: 'https://www.youtube.com/watch?v=0v6MO0EB7UY',
       },
       {
         titulo: 'Batman: O Cavaleiro das Trevas',
@@ -33,6 +34,7 @@ export class SeedService implements OnModuleInit {
         duracao: 152,
         poster: 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
         sinopse: 'Batman enfrenta o Coringa, um criminoso caótico que quer mergulhar Gotham City no caos. Um duelo entre o herói e o vilão que desafia os limites da moral.',
+        trailer: 'https://www.youtube.com/watch?v=zqfz04yCTnE',
       },
       {
         titulo: 'A Origem',
@@ -42,6 +44,7 @@ export class SeedService implements OnModuleInit {
         duracao: 148,
         poster: 'https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg',
         sinopse: 'Um ladrão especializado em extrair segredos do subconsciente durante o sono recebe a missão inversa: plantar uma ideia na mente de um alvo.',
+        trailer: 'https://www.youtube.com/watch?v=HiixbtN-O24',
       },
       {
         titulo: 'Pulp Fiction',
@@ -51,6 +54,7 @@ export class SeedService implements OnModuleInit {
         duracao: 154,
         poster: 'https://image.tmdb.org/t/p/w500/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg',
         sinopse: 'Histórias entrelaçadas de criminosos, um boxeador corrupto e dois assassinos profissionais no submundo de Los Angeles.',
+        trailer: 'https://www.youtube.com/watch?v=5ZAhzsi1ybM',
       },
       {
         titulo: 'Forrest Gump',
@@ -60,6 +64,7 @@ export class SeedService implements OnModuleInit {
         duracao: 142,
         poster: 'https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg',
         sinopse: 'A vida extraordinária de um homem simples do Alabama que, sem querer, testemunha e influencia alguns dos eventos mais marcantes da história americana.',
+        trailer: 'https://www.youtube.com/watch?v=vDY_uZAaU7g',
       },
       {
         titulo: 'Um Sonho de Liberdade',
@@ -69,6 +74,7 @@ export class SeedService implements OnModuleInit {
         duracao: 142,
         poster: 'https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg',
         sinopse: 'Andy Dufresne é condenado injustamente à prisão de Shawshank. Ao longo de 20 anos, ele mantém esperança e transforma a vida dos outros detentos.',
+        trailer: 'https://www.youtube.com/watch?v=Y22NgkErOAk',
       },
     ];
 
