@@ -1,4 +1,4 @@
-const BASE_URL = 'https://4462-2804-3c74-3f0-4dee-a6a-cee2-6314-47b5.ngrok-free.app/api';
+const BASE_URL = 'http://localhost:3001/api';
 
 // Função base para todas as requisições
 async function request(method, path, body = null) {
