@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
+import clientRoutes from './routes/clientRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +23,9 @@ app.get('/', (req, res) => {
 
 // Rotas de autenticação
 app.use('/api/auth', authRoutes);
+
+// Rotas de clientes
+app.use('/api/clients', clientRoutes);
 
 // Tratamento de erro de rota não encontrada
 app.use((req, res) => {
