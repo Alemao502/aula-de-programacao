@@ -7,7 +7,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import ClientList from './pages/ClientList';
 import ClientNew from './pages/ClientNew';
-import ClientEdit from './pages/ClientEdit';
+import ClientDetail from './pages/ClientDetail';
 
 function App() {
   return (
@@ -47,6 +47,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <ClientNew />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/clients/:id"
+              element={
+                <PrivateRoute>
+                  <ClientDetail />
                 </PrivateRoute>
               }
             />

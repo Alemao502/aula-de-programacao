@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { clientService } from '../services/clientService';
 
 export const useClients = () => {
@@ -12,21 +12,34 @@ export const useClients = () => {
     pages: 0
   });
 
-  const fetchClients = async (page = 1, limit = 10) => {
+  const fetchClients = useCallback(async (page = 1, search = '', type = '', showInactive = false) => {
     setLoading(true);
     setError('');
 
-    const result = await clientService.getClients(page, limit);
+    try {
+      const params = {
+        page,
+        limit: pagination.limit,
+        search: search || undefined,
+        type: type || undefined,
+        active: showInactive ? undefined : true
+      };
 
-    if (result.success) {
-      setClients(result.clients);
-      setPagination(result.pagination);
-    } else {
-      setError(result.error);
+      const result = await clientService.getClients(params);
+
+      if (result.success) {
+        setClients(result.clients);
+        setPagination(result.pagination);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Erro ao carregar clientes');
+      console.error('Erro ao buscar clientes:', err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-  };
+  }, [pagination.limit]);
 
   const createClient = async (clientData) => {
     setLoading(true);
@@ -64,8 +77,10 @@ export const useClients = () => {
     const result = await clientService.deactivateClient(id);
 
     if (result.success) {
-      // Remover da lista local
-      setClients(clients.filter(client => client.id !== id));
+      // Atualizar status local
+      setClients(clients.map(client =>
+        client.id === id ? { ...client, active: false } : client
+      ));
       return { success: true, message: result.message };
     } else {
       setError(result.error);
@@ -86,9 +101,29 @@ export const useClients = () => {
     }
   };
 
+  const getClientById = async (id) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await clientService.getClientById(id);
+      if (result.success) {
+        return result.client;
+      } else {
+        setError(result.error);
+        return null;
+      }
+    } catch (err) {
+      setError('Erro ao buscar cliente');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [fetchClients]);
 
   return {
     clients,
@@ -99,6 +134,7 @@ export const useClients = () => {
     createClient,
     updateClient,
     deactivateClient,
-    activateClient
+    activateClient,
+    getClientById
   };
 };

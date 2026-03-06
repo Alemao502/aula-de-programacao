@@ -31,6 +31,9 @@ export const getClientsController = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const type = req.query.type || '';
+    const active = req.query.active !== undefined ? req.query.active === 'true' : undefined;
 
     // Validar parâmetros
     if (page < 1 || limit < 1 || limit > 100) {
@@ -39,7 +42,7 @@ export const getClientsController = async (req, res) => {
       });
     }
 
-    const result = await getClients(page, limit);
+    const result = await getClients({ page, limit, search, type, active });
 
     if (!result.success) {
       return res.status(500).json({ error: result.error });

@@ -75,13 +75,56 @@ export const createClient = async (clientData) => {
   }
 };
 
-export const getClients = async (page = 1, limit = 10) => {
+export const getClients = async (params = {}) => {
   try {
+    const { page = 1, limit = 10, search = '', type = '', active } = params;
     const skip = (page - 1) * limit;
+
+    // Construir filtros
+    const where = {};
+
+    // Filtro por status ativo/inativo
+    if (active !== undefined) {
+      where.active = active;
+    }
+
+    // Filtro por tipo
+    if (type && ['PF', 'PJ'].includes(type)) {
+      where.type = type;
+    }
+
+    // Filtro de busca
+    if (search) {
+      where.OR = [
+        {
+          name: {
+            contains: search,
+            mode: 'insensitive'
+          }
+        },
+        {
+          document: {
+            contains: search.replace(/\D/g, '') // Remover caracteres não numéricos para busca
+          }
+        },
+        {
+          email: {
+            contains: search,
+            mode: 'insensitive'
+          }
+        },
+        ...(type === 'PJ' ? [{
+          responsible_name: {
+            contains: search,
+            mode: 'insensitive'
+          }
+        }] : [])
+      ];
+    }
 
     const [clients, total] = await Promise.all([
       prisma.client.findMany({
-        where: { active: true },
+        where,
         select: {
           id: true,
           type: true,
@@ -98,9 +141,7 @@ export const getClients = async (page = 1, limit = 10) => {
         skip,
         take: limit,
       }),
-      prisma.client.count({
-        where: { active: true },
-      }),
+      prisma.client.count({ where }),
     ]);
 
     return {

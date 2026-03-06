@@ -3,13 +3,26 @@ import { Link } from 'react-router-dom';
 import { useClients } from '../hooks/useClients';
 
 const ClientList = () => {
-  const { clients, loading, error, pagination, fetchClients, deactivateClient } = useClients();
+  const { clients, loading, error, pagination, fetchClients, deactivateClient, activateClient } = useClients();
   const [deactivatingId, setDeactivatingId] = useState(null);
+  const [showInactive, setShowInactive] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('');
 
   const handleDeactivate = async (id) => {
-    setDeactivatingId(id);
-    await deactivateClient(id);
-    setDeactivatingId(null);
+    if (window.confirm('Tem certeza que deseja desativar este cliente?')) {
+      setDeactivatingId(id);
+      await deactivateClient(id);
+      setDeactivatingId(null);
+    }
+  };
+
+  const handleActivate = async (id) => {
+    if (window.confirm('Tem certeza que deseja reativar este cliente?')) {
+      setDeactivatingId(id);
+      await activateClient(id);
+      setDeactivatingId(null);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -25,6 +38,18 @@ const ClientList = () => {
       return document.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
   };
+
+  // Filtrar clientes baseado na busca e filtros
+  const filteredClients = clients.filter(client => {
+    const matchesSearch = searchTerm === '' ||
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.document.includes(searchTerm.replace(/\D/g, '')) ||
+      (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesType = filterType === '' || client.type === filterType;
+
+    return matchesSearch && matchesType;
+  });
 
   if (loading && clients.length === 0) {
     return (
@@ -53,13 +78,61 @@ const ClientList = () => {
         </div>
       </div>
 
+      {/* Filtros e Busca */}
+      <div className="mt-8 bg-white p-4 rounded-lg shadow">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-2">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700">
+              Buscar
+            </label>
+            <input
+              type="text"
+              name="search"
+              id="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Nome, CPF/CNPJ ou email..."
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            />
+          </div>
+          <div>
+            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+              Tipo
+            </label>
+            <select
+              id="type"
+              name="type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="PF">Pessoa Física</option>
+              <option value="PJ">Pessoa Jurídica</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700">Mostrar inativos</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       {error && (
         <div className="mt-4 rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-700">{error}</div>
         </div>
       )}
 
-      <div className="mt-8 flex flex-col">
+      {/* Desktop Table */}
+      <div className="mt-8 hidden lg:block">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -76,13 +149,13 @@ const ClientList = () => {
                       Documento
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Email
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Telefone
+                      Contato
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Aniversário
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Status
                     </th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Ações</span>
@@ -90,15 +163,17 @@ const ClientList = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {clients.map((client) => (
-                    <tr key={client.id}>
+                  {filteredClients.map((client) => (
+                    <tr key={client.id} className={!client.active ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                        {client.name}
-                        {client.responsible_name && (
-                          <div className="text-xs text-gray-500">
-                            Resp: {client.responsible_name}
-                          </div>
-                        )}
+                        <div>
+                          <div className="font-medium">{client.name}</div>
+                          {client.responsible_name && (
+                            <div className="text-xs text-gray-500">
+                              Resp: {client.responsible_name}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -113,28 +188,54 @@ const ClientList = () => {
                         {formatDocument(client.document, client.type)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {client.email || '-'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {client.phone || '-'}
+                        <div>
+                          {client.email && <div>{client.email}</div>}
+                          {client.phone && <div>{client.phone}</div>}
+                          {!client.email && !client.phone && <span className="text-gray-400">-</span>}
+                        </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {formatDate(client.birthday)}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          client.active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {client.active ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <Link
+                          to={`/clients/${client.id}`}
+                          className="text-blue-600 hover:text-blue-900 mr-4"
+                        >
+                          Ver
+                        </Link>
                         <Link
                           to={`/clients/${client.id}/edit`}
                           className="text-blue-600 hover:text-blue-900 mr-4"
                         >
                           Editar
                         </Link>
-                        <button
-                          onClick={() => handleDeactivate(client.id)}
-                          disabled={deactivatingId === client.id}
-                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                        >
-                          {deactivatingId === client.id ? 'Desativando...' : 'Desativar'}
-                        </button>
+                        {client.active ? (
+                          <button
+                            onClick={() => handleDeactivate(client.id)}
+                            disabled={deactivatingId === client.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            {deactivatingId === client.id ? 'Desativando...' : 'Desativar'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleActivate(client.id)}
+                            disabled={deactivatingId === client.id}
+                            className="text-green-600 hover:text-green-900 disabled:opacity-50"
+                          >
+                            {deactivatingId === client.id ? 'Ativando...' : 'Reativar'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -145,17 +246,95 @@ const ClientList = () => {
         </div>
       </div>
 
-      {clients.length === 0 && !loading && (
+      {/* Mobile Cards */}
+      <div className="mt-8 lg:hidden">
+        <div className="grid grid-cols-1 gap-4">
+          {filteredClients.map((client) => (
+            <div key={client.id} className={`bg-white p-4 rounded-lg shadow ${!client.active ? 'bg-gray-50 opacity-60' : ''}`}>
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900">{client.name}</h3>
+                  {client.responsible_name && (
+                    <p className="text-sm text-gray-500">Resp: {client.responsible_name}</p>
+                  )}
+                  <div className="mt-2 flex items-center space-x-2">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      client.type === 'PF'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {client.type === 'PF' ? 'PF' : 'PJ'}
+                    </span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      client.active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {client.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p><strong>Documento:</strong> {formatDocument(client.document, client.type)}</p>
+                    <p><strong>Aniversário:</strong> {formatDate(client.birthday)}</p>
+                    {client.email && <p><strong>Email:</strong> {client.email}</p>}
+                    {client.phone && <p><strong>Telefone:</strong> {client.phone}</p>}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex space-x-2">
+                <Link
+                  to={`/clients/${client.id}`}
+                  className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium text-center hover:bg-blue-700"
+                >
+                  Ver
+                </Link>
+                <Link
+                  to={`/clients/${client.id}/edit`}
+                  className="flex-1 bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-medium text-center hover:bg-gray-700"
+                >
+                  Editar
+                </Link>
+                {client.active ? (
+                  <button
+                    onClick={() => handleDeactivate(client.id)}
+                    disabled={deactivatingId === client.id}
+                    className="flex-1 bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {deactivatingId === client.id ? '...' : 'Desativar'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleActivate(client.id)}
+                    disabled={deactivatingId === client.id}
+                    className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {deactivatingId === client.id ? '...' : 'Reativar'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {filteredClients.length === 0 && !loading && (
         <div className="text-center py-12">
-          <p className="text-gray-500">Nenhum cliente cadastrado ainda.</p>
-          <div className="mt-6">
-            <Link
-              to="/clients/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Cadastrar primeiro cliente
-            </Link>
-          </div>
+          <p className="text-gray-500">
+            {clients.length === 0
+              ? 'Nenhum cliente cadastrado ainda.'
+              : 'Nenhum cliente encontrado com os filtros aplicados.'
+            }
+          </p>
+          {clients.length === 0 && (
+            <div className="mt-6">
+              <Link
+                to="/clients/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Cadastrar primeiro cliente
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

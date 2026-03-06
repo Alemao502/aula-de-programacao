@@ -2,11 +2,9 @@ import api from './api';
 
 export const clientService = {
   // Buscar todos os clientes
-  async getClients(page = 1, limit = 10) {
+  async getClients(params = {}) {
     try {
-      const response = await api.get('/clients', {
-        params: { page, limit }
-      });
+      const response = await api.get('/clients', { params });
       return {
         success: true,
         clients: response.data.clients,
