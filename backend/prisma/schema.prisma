@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Model: User (para autenticação do dono do sistema)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password_hash String
+  resetToken String?
+  resetTokenExpiry DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("users")
+}
+
+// Model: Client (Pessoa Física ou Jurídica)
+model Client {
+  id                String   @id @default(cuid())
+  type              String   // "PF" ou "PJ"
+  name              String   // nome completo (PF) ou razão social (PJ)
+  document          String   @unique // CPF ou CNPJ
+  email             String?
+  phone             String?
+  responsible_name  String?  // obrigatório se PJ
+  birthday          DateTime // data de aniversário (PF) ou do responsável (PJ)
+  active            Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@index([document])
+  @@index([birthday])
+  @@map("clients")
+}

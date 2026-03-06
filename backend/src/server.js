@@ -1,6 +1,7 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,12 +20,22 @@ app.get('/', (req, res) => {
   res.json({ message: 'API de Cadastro de Clientes funcionando!' });
 });
 
+// Rotas de autenticação
+app.use('/api/auth', authRoutes);
+
 // Tratamento de erro de rota não encontrada
 app.use((req, res) => {
   res.status(404).json({ error: 'Rota não encontrada' });
+});
+
+// Tratamento de erros globais
+app.use((error, req, res, next) => {
+  console.error('Erro não tratado:', error);
+  res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
