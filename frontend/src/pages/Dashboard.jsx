@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
@@ -45,17 +46,20 @@ const Dashboard = () => {
                 Sistema de gerenciamento de clientes para escritório contábil
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow">
+                <Link
+                  to="/clients"
+                  className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer block"
+                >
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Clientes
+                    👥 Clientes
                   </h3>
                   <p className="text-gray-600">
-                    Gerencie seus clientes
+                    Gerencie seus clientes cadastrados
                   </p>
-                </div>
+                </Link>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Aniversários
+                    🎂 Aniversários
                   </h3>
                   <p className="text-gray-600">
                     Lembretes de aniversários
@@ -63,7 +67,7 @@ const Dashboard = () => {
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Relatórios
+                    📊 Relatórios
                   </h3>
                   <p className="text-gray-600">
                     Relatórios e estatísticas

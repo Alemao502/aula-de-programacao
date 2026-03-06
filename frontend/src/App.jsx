@@ -5,6 +5,9 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
+import ClientList from './pages/ClientList';
+import ClientNew from './pages/ClientNew';
+import ClientEdit from './pages/ClientEdit';
 
 function App() {
   return (
@@ -26,6 +29,32 @@ function App() {
               element={
                 <PrivateRoute>
                   <Dashboard />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Rotas de clientes */}
+            <Route
+              path="/clients"
+              element={
+                <PrivateRoute>
+                  <ClientList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/clients/new"
+              element={
+                <PrivateRoute>
+                  <ClientNew />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/clients/:id/edit"
+              element={
+                <PrivateRoute>
+                  <ClientEdit />
                 </PrivateRoute>
               }
             />
